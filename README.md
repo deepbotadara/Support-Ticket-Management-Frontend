@@ -7,11 +7,11 @@ Built with Express.js, MySQL and JWT authentication.
 ## How to Run
 
 1. Run `npm install`
-2. Create a `.env` file (copy from `.env.example`) and set your MySQL credentials
-3. Create the database in MySQL:
+2. Create the database in MySQL:
 ```sql
 CREATE DATABASE support_ticket_db;
 ```
+3. Update the `.env` file with your MySQL credentials if needed
 4. Seed the database with initial users:
 ```
 node seed.js
