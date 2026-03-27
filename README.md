@@ -4,6 +4,12 @@ Backend API for a helpdesk system where employees can raise tickets, support sta
 
 Built with Express.js, MySQL and JWT authentication.
 
+## Project Description
+
+This backend exam project implements a role-based Support Ticket Management System for organizations. The API allows users to create and track support requests, enables support staff to manage and resolve assigned issues, and gives managers complete visibility and control over the workflow.
+
+The system is designed to demonstrate practical backend engineering skills, including secure authentication, authorization by role, structured REST API design, relational data modeling, pagination and filtering, ticket lifecycle management, and auditable status transitions. It also includes Swagger documentation for easy testing and evaluation.
+
 ## How to Run
 
 1. Run `npm install`
