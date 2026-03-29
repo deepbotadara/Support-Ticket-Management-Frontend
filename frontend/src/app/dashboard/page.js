@@ -109,6 +109,9 @@ export default function DashboardPage() {
                 <Link className="btn btn-outline" href="/users">
                   Open Users Page
                 </Link>
+                <Link className="btn btn-outline" href="/reports">
+                  Open Reports Page
+                </Link>
               </div>
             </div>
 
