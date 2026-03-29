@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import NavBar from "@/components/NavBar";
 import { fetchTickets, fetchUsers } from "@/lib/api";
@@ -104,6 +105,11 @@ export default function DashboardPage() {
             <div className="content-head" style={{ marginTop: "1.2rem" }}>
               <h2>Team Snapshot</h2>
               <p>Current user distribution across roles.</p>
+              <div className="ticket-actions" style={{ marginTop: "0.75rem" }}>
+                <Link className="btn btn-outline" href="/users">
+                  Open Users Page
+                </Link>
+              </div>
             </div>
 
             {loading ? (

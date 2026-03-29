@@ -377,6 +377,34 @@ textarea:focus {
   color: var(--ink-soft);
 }
 
+.table-wrap {
+  margin-top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: auto;
+  background: color-mix(in srgb, var(--surface-strong) 94%, white);
+  box-shadow: 0 12px 28px rgb(16 21 32 / 8%);
+}
+
+.simple-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.simple-table th,
+.simple-table td {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.93rem;
+}
+
+.simple-table thead th {
+  background: #f3e8d7;
+  font-weight: 700;
+}
+
 .skeleton-card {
   border: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface-strong) 94%, white);
