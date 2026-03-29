@@ -3,3 +3,11 @@ bin/
 obj/
 .vs/
 *.log
+
+# Keep secrets out of source control
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+!.env.example
