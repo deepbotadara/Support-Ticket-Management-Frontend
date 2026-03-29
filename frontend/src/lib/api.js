@@ -49,3 +49,15 @@ export const createTicket = (token, payload) =>
     token,
     body: payload,
   });
+
+export const fetchTicketComments = (token, ticketId) =>
+  apiRequest(`/tickets/${ticketId}/comments`, {
+    token,
+  });
+
+export const addTicketComment = (token, ticketId, comment) =>
+  apiRequest(`/tickets/${ticketId}/comments`, {
+    method: "POST",
+    token,
+    body: { comment },
+  });

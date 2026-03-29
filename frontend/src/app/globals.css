@@ -231,6 +231,16 @@ button {
   font-size: 0.92rem;
 }
 
+.ticket-actions {
+  margin-top: 0.9rem;
+}
+
+.comments-block {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
 .status-pill {
   border-radius: 999px;
   padding: 0.2rem 0.55rem;

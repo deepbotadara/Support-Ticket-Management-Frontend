@@ -1,23 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredAuth } from "@/lib/auth";
 
 export const useAuthGuard = () => {
   const router = useRouter();
-  const [state, setState] = useState({ ready: false, token: null, user: null });
+  const auth = useMemo(() => getStoredAuth(), []);
 
   useEffect(() => {
-    const auth = getStoredAuth();
-
     if (!auth) {
       router.replace("/");
-      return;
     }
+  }, [auth, router]);
 
-    setState({ ready: true, token: auth.token, user: auth.user });
-  }, [router]);
-
-  return state;
+  return {
+    ready: Boolean(auth),
+    token: auth?.token || null,
+    user: auth?.user || null,
+  };
 };

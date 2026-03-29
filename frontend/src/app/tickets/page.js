@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import { fetchTickets } from "@/lib/api";
@@ -98,6 +99,12 @@ export default function TicketsPage() {
                   <span>Priority: {ticket.priority}</span>
                   <span>Creator: {ticket.creator?.email || "-"}</span>
                   <span>Assignee: {ticket.assignee?.email || "Unassigned"}</span>
+                </div>
+
+                <div className="ticket-actions">
+                  <Link className="btn btn-outline" href={`/tickets/${ticket.id}`}>
+                    View Details
+                  </Link>
                 </div>
               </article>
             ))}
