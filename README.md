@@ -1,51 +1,59 @@
-# Support Ticket Management API
+# Support Ticket Management System
 
-Backend API for a helpdesk system where employees can raise tickets, support staff handles them, and managers can track everything.
+Role-based support ticket system with Express, MySQL, Sequelize, JWT, and Next.js.
 
-Built with Express.js, MySQL and JWT authentication.
+## Project Structure
 
-## Project Description
+- Backend: root folder
+- Frontend: `frontend/`
 
-This backend exam project implements a role-based Support Ticket Management System for organizations. The API allows users to create and track support requests, enables support staff to manage and resolve assigned issues, and gives managers complete visibility and control over the workflow.
+## Backend Setup
 
-The system is designed to demonstrate practical backend engineering skills, including secure authentication, authorization by role, structured REST API design, relational data modeling, pagination and filtering, ticket lifecycle management, and auditable status transitions. It also includes Swagger documentation for easy testing and evaluation.
+1. Install dependencies:
 
-## How to Run
+```bash
+npm install
+```
 
-1. Run `npm install`
-2. Create the database in MySQL:
+2. Create database:
+
 ```sql
 CREATE DATABASE support_ticket_db;
 ```
-3. Update the `.env` file with your MySQL credentials if needed
-4. Seed the database with initial users:
-```
+
+3. Create `.env` from `.env.example` and set values.
+
+4. Seed initial users:
+
+```bash
 node seed.js
 ```
-5. Start the server:
-npm start
 
-Server runs on http://localhost:3000
-Swagger docs: http://localhost:3000/docs
+5. Run backend:
 
-## Endpoints
+```bash
+npm run dev
+```
 
-| Endpoint | Method | Who can access |
-|---|---|---|
-| /auth/login | POST | Anyone |
-| /users | POST | MANAGER |
-| /users | GET | MANAGER |
-| /tickets | POST | USER, MANAGER |
-| /tickets | GET | MANAGER (all), SUPPORT (assigned), USER (own) |
-| /tickets/:id/assign | PATCH | MANAGER, SUPPORT |
-| /tickets/:id/status | PATCH | MANAGER, SUPPORT |
-| /tickets/:id | DELETE | MANAGER |
-| /tickets/:id/comments | POST | MANAGER, SUPPORT (if assigned), USER (if owner) |
-| /tickets/:id/comments | GET | MANAGER, SUPPORT (if assigned), USER (if owner) |
-| /comments/:id | PATCH | MANAGER or comment author |
-| /comments/:id | DELETE | MANAGER or comment author |
+Backend URL: `http://localhost:3000`  
+Swagger URL: `http://localhost:3000/docs`
 
-GET /tickets also supports query params: `page`, `limit`, `status`, `priority`
+## Frontend Setup
+
+1. Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+2. Run frontend:
+
+```bash
+npm run dev
+```
+
+Frontend URL: `http://localhost:3001`
 
 ## Test Users
 
@@ -56,7 +64,12 @@ GET /tickets also supports query params: `page`, `limit`, `status`, `priority`
 | Jayesh | jayesh@support.com | password123 | SUPPORT |
 | Preet | preet@user.com | password123 | USER |
 
-## Status Flow
+## Role Permissions
+
+- USER: create own tickets, view own tickets, comment on own tickets
+- SUPPORT: view assigned tickets, update status, comment on assigned tickets
+- MANAGER: full ticket access, assign tickets, manage users
+
+## Ticket Status Flow
 
 OPEN -> IN_PROGRESS -> RESOLVED -> CLOSED
-You can only move one step forward. Skipping steps gives 400 error.
