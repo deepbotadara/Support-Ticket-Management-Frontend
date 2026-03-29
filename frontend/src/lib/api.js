@@ -1,3 +1,5 @@
+import { clearAuthToken } from "@/lib/auth";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 const parseJsonSafely = (text) => {
@@ -23,6 +25,15 @@ export const apiRequest = async (path, { method = "GET", token, body } = {}) => 
 
   const text = await response.text();
   const data = parseJsonSafely(text);
+
+  if (response.status === 401) {
+    clearAuthToken();
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      window.location.href = "/";
+    }
+
+    throw new Error("Session expired. Please sign in again.");
+  }
 
   if (!response.ok) {
     const message = data?.message || `Request failed with status ${response.status}`;

@@ -28,6 +28,11 @@ export const getStoredAuth = () => {
     return null;
   }
 
+  if (payload.exp && Date.now() >= payload.exp * 1000) {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+
   return {
     token,
     user: {
