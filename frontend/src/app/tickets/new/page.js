@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/NavBar";
@@ -8,7 +9,7 @@ import { useAuthGuard } from "@/lib/useAuthGuard";
 
 export default function NewTicketPage() {
   const router = useRouter();
-  const { ready, token } = useAuthGuard();
+  const { ready, token, user } = useAuthGuard();
 
   const [form, setForm] = useState({
     title: "",
@@ -35,6 +36,25 @@ export default function NewTicketPage() {
 
   if (!ready) {
     return <main className="center-message">Checking your session...</main>;
+  }
+
+  if (user?.role !== "USER" && user?.role !== "MANAGER") {
+    return (
+      <main className="app-shell">
+        <NavBar />
+
+        <section className="content">
+          <article className="ticket-card">
+            <p className="error-text">Only USER and MANAGER can create tickets.</p>
+            <div className="ticket-actions">
+              <Link className="btn btn-outline" href="/tickets">
+                Back to Tickets
+              </Link>
+            </div>
+          </article>
+        </section>
+      </main>
+    );
   }
 
   return (
