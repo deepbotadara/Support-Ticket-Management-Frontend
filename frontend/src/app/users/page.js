@@ -45,6 +45,13 @@ export default function UsersPage() {
         <div className="content-head">
           <h2>Users</h2>
           <p>Manager view of all users and their roles.</p>
+          {user?.role === "MANAGER" && (
+            <div className="ticket-actions" style={{ marginTop: "0.75rem" }}>
+              <Link className="btn btn-outline" href="/users/new">
+                Create User
+              </Link>
+            </div>
+          )}
         </div>
 
         {user?.role !== "MANAGER" ? (

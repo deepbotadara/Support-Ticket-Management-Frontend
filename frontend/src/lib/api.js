@@ -79,6 +79,13 @@ export const fetchUsers = (token) =>
     token,
   });
 
+export const createUser = (token, payload) =>
+  apiRequest("/users", {
+    method: "POST",
+    token,
+    body: payload,
+  });
+
 export const assignTicket = (token, ticketId, userId) =>
   apiRequest(`/tickets/${ticketId}/assign`, {
     method: "PATCH",
