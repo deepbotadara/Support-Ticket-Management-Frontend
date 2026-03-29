@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import NavBar from "@/components/NavBar";
 import { fetchTickets } from "@/lib/api";
 import { useAuthGuard } from "@/lib/useAuthGuard";
@@ -81,7 +82,11 @@ export default function TicketsPage() {
         {error && <p className="error-text">{error}</p>}
 
         {loading ? (
-          <p className="muted">Loading tickets...</p>
+          <div className="ticket-list">
+            <LoadingSkeleton lines={4} />
+            <LoadingSkeleton lines={4} />
+            <LoadingSkeleton lines={4} />
+          </div>
         ) : (
           <div className="ticket-list">
             {tickets.length === 0 && <p className="muted">No tickets found.</p>}

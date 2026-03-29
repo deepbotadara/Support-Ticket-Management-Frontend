@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import NavBar from "@/components/NavBar";
 import {
   addTicketComment,
@@ -206,7 +207,10 @@ export default function TicketDetailsPage() {
         {error && <p className="error-text">{error}</p>}
 
         {loading ? (
-          <p className="muted">Loading ticket...</p>
+          <div className="ticket-list">
+            <LoadingSkeleton lines={5} />
+            <LoadingSkeleton lines={4} />
+          </div>
         ) : ticket ? (
           <>
             <article className="ticket-card">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 import NavBar from "@/components/NavBar";
 import { fetchTickets, fetchUsers } from "@/lib/api";
 import { useAuthGuard } from "@/lib/useAuthGuard";
@@ -11,12 +12,14 @@ export default function DashboardPage() {
   const { ready, token, user } = useAuthGuard();
   const [tickets, setTickets] = useState([]);
   const [userStats, setUserStats] = useState({ total: 0, MANAGER: 0, SUPPORT: 0, USER: 0 });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!ready) return;
 
     const load = async () => {
+      setLoading(true);
       try {
         const data = await fetchTickets(token, "?page=1&limit=100");
         setTickets(data?.tickets || []);
@@ -33,6 +36,8 @@ export default function DashboardPage() {
         }
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -72,18 +77,27 @@ export default function DashboardPage() {
 
         {error && <p className="error-text">{error}</p>}
 
-        <section className="stats-grid">
-          <article className="stat-card">
-            <p>Total Tickets</p>
-            <h3>{stats.total}</h3>
-          </article>
-          {STATUS_ORDER.map((status) => (
-            <article key={status} className="stat-card">
-              <p>{status.replace("_", " ")}</p>
-              <h3>{stats[status]}</h3>
+        {loading ? (
+          <section className="stats-grid">
+            <LoadingSkeleton lines={3} />
+            <LoadingSkeleton lines={3} />
+            <LoadingSkeleton lines={3} />
+            <LoadingSkeleton lines={3} />
+          </section>
+        ) : (
+          <section className="stats-grid">
+            <article className="stat-card">
+              <p>Total Tickets</p>
+              <h3>{stats.total}</h3>
             </article>
-          ))}
-        </section>
+            {STATUS_ORDER.map((status) => (
+              <article key={status} className="stat-card">
+                <p>{status.replace("_", " ")}</p>
+                <h3>{stats[status]}</h3>
+              </article>
+            ))}
+          </section>
+        )}
 
         {user?.role === "MANAGER" && (
           <>
@@ -92,24 +106,33 @@ export default function DashboardPage() {
               <p>Current user distribution across roles.</p>
             </div>
 
-            <section className="stats-grid">
-              <article className="stat-card">
-                <p>Total Users</p>
-                <h3>{userStats.total}</h3>
-              </article>
-              <article className="stat-card">
-                <p>Managers</p>
-                <h3>{userStats.MANAGER}</h3>
-              </article>
-              <article className="stat-card">
-                <p>Support</p>
-                <h3>{userStats.SUPPORT}</h3>
-              </article>
-              <article className="stat-card">
-                <p>Users</p>
-                <h3>{userStats.USER}</h3>
-              </article>
-            </section>
+            {loading ? (
+              <section className="stats-grid">
+                <LoadingSkeleton lines={3} />
+                <LoadingSkeleton lines={3} />
+                <LoadingSkeleton lines={3} />
+                <LoadingSkeleton lines={3} />
+              </section>
+            ) : (
+              <section className="stats-grid">
+                <article className="stat-card">
+                  <p>Total Users</p>
+                  <h3>{userStats.total}</h3>
+                </article>
+                <article className="stat-card">
+                  <p>Managers</p>
+                  <h3>{userStats.MANAGER}</h3>
+                </article>
+                <article className="stat-card">
+                  <p>Support</p>
+                  <h3>{userStats.SUPPORT}</h3>
+                </article>
+                <article className="stat-card">
+                  <p>Users</p>
+                  <h3>{userStats.USER}</h3>
+                </article>
+              </section>
+            )}
           </>
         )}
       </section>
