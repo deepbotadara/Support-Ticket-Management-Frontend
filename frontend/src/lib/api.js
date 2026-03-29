@@ -61,3 +61,16 @@ export const addTicketComment = (token, ticketId, comment) =>
     token,
     body: { comment },
   });
+
+export const updateComment = (token, commentId, comment) =>
+  apiRequest(`/comments/${commentId}`, {
+    method: "PATCH",
+    token,
+    body: { comment },
+  });
+
+export const deleteComment = (token, commentId) =>
+  apiRequest(`/comments/${commentId}`, {
+    method: "DELETE",
+    token,
+  });

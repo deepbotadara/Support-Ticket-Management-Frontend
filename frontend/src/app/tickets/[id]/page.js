@@ -3,18 +3,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import NavBar from "@/components/NavBar";
-import { addTicketComment, fetchTicketComments, fetchTickets } from "@/lib/api";
+import {
+  addTicketComment,
+  deleteComment,
+  fetchTicketComments,
+  fetchTickets,
+  updateComment,
+} from "@/lib/api";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
 export default function TicketDetailsPage() {
   const { id } = useParams();
-  const { ready, token } = useAuthGuard();
+  const { ready, token, user } = useAuthGuard();
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [editState, setEditState] = useState({ id: null, value: "" });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [actionBusyId, setActionBusyId] = useState(null);
   const [error, setError] = useState("");
 
   const ticketId = useMemo(() => Number(id), [id]);
@@ -67,6 +75,54 @@ export default function TicketDetailsPage() {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const canManageComment = (comment) => {
+    if (!user) return false;
+    if (user.role === "MANAGER") return true;
+    return comment.user_id === user.id;
+  };
+
+  const onStartEdit = (comment) => {
+    setEditState({ id: comment.id, value: comment.comment });
+  };
+
+  const onCancelEdit = () => {
+    setEditState({ id: null, value: "" });
+  };
+
+  const onSaveEdit = async (commentId) => {
+    if (!editState.value.trim()) return;
+
+    setActionBusyId(commentId);
+    setError("");
+
+    try {
+      await updateComment(token, commentId, editState.value.trim());
+      const refreshed = await fetchTicketComments(token, ticketId);
+      setComments(refreshed || []);
+      onCancelEdit();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionBusyId(null);
+    }
+  };
+
+  const onDeleteComment = async (commentId) => {
+    setActionBusyId(commentId);
+    setError("");
+
+    try {
+      await deleteComment(token, commentId);
+      const refreshed = await fetchTicketComments(token, ticketId);
+      setComments(refreshed || []);
+      if (editState.id === commentId) onCancelEdit();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionBusyId(null);
     }
   };
 
@@ -132,11 +188,69 @@ export default function TicketDetailsPage() {
                 ) : (
                   comments.map((comment) => (
                     <article key={comment.id} className="ticket-card">
-                      <p>{comment.comment}</p>
+                      {editState.id === comment.id ? (
+                        <label>
+                          Edit Comment
+                          <textarea
+                            value={editState.value}
+                            onChange={(e) => setEditState((prev) => ({ ...prev, value: e.target.value }))}
+                            rows={3}
+                            minLength={2}
+                            required
+                          />
+                        </label>
+                      ) : (
+                        <p>{comment.comment}</p>
+                      )}
+
                       <div className="ticket-meta">
                         <span>By: {comment.author?.email || "Unknown"}</span>
                         <span>{new Date(comment.created_at).toLocaleString()}</span>
                       </div>
+
+                      {canManageComment(comment) && (
+                        <div className="ticket-actions">
+                          {editState.id === comment.id ? (
+                            <>
+                              <button
+                                type="button"
+                                className="btn"
+                                disabled={actionBusyId === comment.id}
+                                onClick={() => onSaveEdit(comment.id)}
+                              >
+                                {actionBusyId === comment.id ? "Saving..." : "Save"}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-outline"
+                                disabled={actionBusyId === comment.id}
+                                onClick={onCancelEdit}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-outline"
+                                disabled={actionBusyId === comment.id}
+                                onClick={() => onStartEdit(comment)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-outline"
+                                disabled={actionBusyId === comment.id}
+                                onClick={() => onDeleteComment(comment.id)}
+                              >
+                                {actionBusyId === comment.id ? "Deleting..." : "Delete"}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </article>
                   ))
                 )}
