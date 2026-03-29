@@ -9,6 +9,7 @@ import {
   fetchTicketComments,
   fetchTickets,
   updateComment,
+  updateTicketStatus,
 } from "@/lib/api";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
@@ -18,10 +19,12 @@ export default function TicketDetailsPage() {
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
+  const [statusValue, setStatusValue] = useState("OPEN");
   const [commentText, setCommentText] = useState("");
   const [editState, setEditState] = useState({ id: null, value: "" });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [statusSaving, setStatusSaving] = useState(false);
   const [actionBusyId, setActionBusyId] = useState(null);
   const [error, setError] = useState("");
 
@@ -46,6 +49,7 @@ export default function TicketDetailsPage() {
         }
 
         setTicket(selected);
+        setStatusValue(selected.status);
 
         const commentData = await fetchTicketComments(token, ticketId);
         setComments(commentData || []);
@@ -126,6 +130,26 @@ export default function TicketDetailsPage() {
     }
   };
 
+  const canUpdateStatus = user?.role === "MANAGER" || user?.role === "SUPPORT";
+
+  const onUpdateStatus = async (e) => {
+    e.preventDefault();
+    if (!ticket) return;
+
+    setStatusSaving(true);
+    setError("");
+
+    try {
+      const data = await updateTicketStatus(token, ticket.id, statusValue);
+      setTicket(data?.ticket || ticket);
+    } catch (err) {
+      setError(err.message);
+      setStatusValue(ticket.status);
+    } finally {
+      setStatusSaving(false);
+    }
+  };
+
   if (!ready) {
     return <main className="center-message">Checking your session...</main>;
   }
@@ -159,6 +183,28 @@ export default function TicketDetailsPage() {
                 <span>Creator: {ticket.creator?.email || "-"}</span>
                 <span>Assignee: {ticket.assignee?.email || "Unassigned"}</span>
               </div>
+
+              {canUpdateStatus && (
+                <form className="ticket-inline-form" onSubmit={onUpdateStatus}>
+                  <label>
+                    Status
+                    <select
+                      value={statusValue}
+                      onChange={(e) => setStatusValue(e.target.value)}
+                      disabled={statusSaving}
+                    >
+                      <option value="OPEN">OPEN</option>
+                      <option value="IN_PROGRESS">IN PROGRESS</option>
+                      <option value="RESOLVED">RESOLVED</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
+                  </label>
+
+                  <button type="submit" className="btn" disabled={statusSaving || statusValue === ticket.status}>
+                    {statusSaving ? "Updating..." : "Update Status"}
+                  </button>
+                </form>
+              )}
             </article>
 
             <section className="comments-block">

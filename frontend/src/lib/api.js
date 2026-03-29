@@ -50,6 +50,13 @@ export const createTicket = (token, payload) =>
     body: payload,
   });
 
+export const updateTicketStatus = (token, ticketId, status) =>
+  apiRequest(`/tickets/${ticketId}/status`, {
+    method: "PATCH",
+    token,
+    body: { status },
+  });
+
 export const fetchTicketComments = (token, ticketId) =>
   apiRequest(`/tickets/${ticketId}/comments`, {
     token,

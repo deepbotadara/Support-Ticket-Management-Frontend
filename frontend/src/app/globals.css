@@ -238,6 +238,20 @@ button {
   flex-wrap: wrap;
 }
 
+.ticket-inline-form {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.ticket-inline-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.94rem;
+}
+
 .comments-block {
   margin-top: 1rem;
   display: grid;
