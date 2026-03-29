@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import NavBar from "@/components/NavBar";
-import { fetchTickets } from "@/lib/api";
+import { fetchTickets, fetchUsers } from "@/lib/api";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
 const STATUS_ORDER = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
@@ -10,6 +10,7 @@ const STATUS_ORDER = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
 export default function DashboardPage() {
   const { ready, token, user } = useAuthGuard();
   const [tickets, setTickets] = useState([]);
+  const [userStats, setUserStats] = useState({ total: 0, MANAGER: 0, SUPPORT: 0, USER: 0 });
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -19,13 +20,24 @@ export default function DashboardPage() {
       try {
         const data = await fetchTickets(token, "?page=1&limit=100");
         setTickets(data?.tickets || []);
+
+        if (user?.role === "MANAGER") {
+          const users = await fetchUsers(token);
+          const stats = { total: users.length, MANAGER: 0, SUPPORT: 0, USER: 0 };
+
+          users.forEach((u) => {
+            if (stats[u.role] !== undefined) stats[u.role] += 1;
+          });
+
+          setUserStats(stats);
+        }
       } catch (err) {
         setError(err.message);
       }
     };
 
     load();
-  }, [ready, token]);
+  }, [ready, token, user?.role]);
 
   const stats = useMemo(() => {
     const base = {
@@ -72,6 +84,34 @@ export default function DashboardPage() {
             </article>
           ))}
         </section>
+
+        {user?.role === "MANAGER" && (
+          <>
+            <div className="content-head" style={{ marginTop: "1.2rem" }}>
+              <h2>Team Snapshot</h2>
+              <p>Current user distribution across roles.</p>
+            </div>
+
+            <section className="stats-grid">
+              <article className="stat-card">
+                <p>Total Users</p>
+                <h3>{userStats.total}</h3>
+              </article>
+              <article className="stat-card">
+                <p>Managers</p>
+                <h3>{userStats.MANAGER}</h3>
+              </article>
+              <article className="stat-card">
+                <p>Support</p>
+                <h3>{userStats.SUPPORT}</h3>
+              </article>
+              <article className="stat-card">
+                <p>Users</p>
+                <h3>{userStats.USER}</h3>
+              </article>
+            </section>
+          </>
+        )}
       </section>
     </main>
   );
