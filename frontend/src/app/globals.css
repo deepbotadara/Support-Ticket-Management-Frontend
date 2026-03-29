@@ -349,6 +349,14 @@ textarea:focus {
   background: #f8f3eb;
 }
 
+.btn-danger {
+  background: #ba2f2f;
+}
+
+.btn-danger:hover {
+  background: #9d2727;
+}
+
 .error-text {
   color: #b33a2f;
   font-size: 0.93rem;

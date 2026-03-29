@@ -61,6 +61,12 @@ export const createTicket = (token, payload) =>
     body: payload,
   });
 
+export const deleteTicket = (token, ticketId) =>
+  apiRequest(`/tickets/${ticketId}`, {
+    method: "DELETE",
+    token,
+  });
+
 export const updateTicketStatus = (token, ticketId, status) =>
   apiRequest(`/tickets/${ticketId}/status`, {
     method: "PATCH",

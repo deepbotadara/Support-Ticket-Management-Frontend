@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import NavBar from "@/components/NavBar";
 import {
   addTicketComment,
   assignTicket,
   deleteComment,
+  deleteTicket,
   fetchTicketComments,
   fetchTickets,
   fetchUsers,
@@ -17,6 +18,7 @@ import {
 import { useAuthGuard } from "@/lib/useAuthGuard";
 
 export default function TicketDetailsPage() {
+  const router = useRouter();
   const { id } = useParams();
   const { ready, token, user } = useAuthGuard();
 
@@ -31,6 +33,7 @@ export default function TicketDetailsPage() {
   const [saving, setSaving] = useState(false);
   const [statusSaving, setStatusSaving] = useState(false);
   const [assignSaving, setAssignSaving] = useState(false);
+  const [deleteSaving, setDeleteSaving] = useState(false);
   const [actionBusyId, setActionBusyId] = useState(null);
   const [error, setError] = useState("");
 
@@ -190,6 +193,24 @@ export default function TicketDetailsPage() {
     }
   };
 
+  const onDeleteTicket = async () => {
+    if (!ticket || user?.role !== "MANAGER") return;
+
+    const confirmed = window.confirm("Delete this ticket? This cannot be undone.");
+    if (!confirmed) return;
+
+    setDeleteSaving(true);
+    setError("");
+
+    try {
+      await deleteTicket(token, ticket.id);
+      router.push("/tickets");
+    } catch (err) {
+      setError(err.message);
+      setDeleteSaving(false);
+    }
+  };
+
   if (!ready) {
     return <main className="center-message">Checking your session...</main>;
   }
@@ -271,6 +292,14 @@ export default function TicketDetailsPage() {
                     {assignSaving ? "Assigning..." : "Assign Ticket"}
                   </button>
                 </form>
+              )}
+
+              {user?.role === "MANAGER" && (
+                <div className="ticket-actions">
+                  <button type="button" className="btn btn-danger" onClick={onDeleteTicket} disabled={deleteSaving}>
+                    {deleteSaving ? "Deleting..." : "Delete Ticket"}
+                  </button>
+                </div>
               )}
             </article>
 
