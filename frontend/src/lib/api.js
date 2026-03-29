@@ -4,6 +4,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 const parseJsonSafely = (text) => {
   if (!text) return null;
+
+  if (text.trim().startsWith("<!DOCTYPE")) {
+    return { message: "Server returned an unexpected HTML response." };
+  }
+
   try {
     return JSON.parse(text);
   } catch {
