@@ -5,9 +5,11 @@ import { useParams } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import {
   addTicketComment,
+  assignTicket,
   deleteComment,
   fetchTicketComments,
   fetchTickets,
+  fetchUsers,
   updateComment,
   updateTicketStatus,
 } from "@/lib/api";
@@ -19,12 +21,15 @@ export default function TicketDetailsPage() {
 
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
+  const [supportUsers, setSupportUsers] = useState([]);
+  const [assigneeValue, setAssigneeValue] = useState("");
   const [statusValue, setStatusValue] = useState("OPEN");
   const [commentText, setCommentText] = useState("");
   const [editState, setEditState] = useState({ id: null, value: "" });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [statusSaving, setStatusSaving] = useState(false);
+  const [assignSaving, setAssignSaving] = useState(false);
   const [actionBusyId, setActionBusyId] = useState(null);
   const [error, setError] = useState("");
 
@@ -50,6 +55,13 @@ export default function TicketDetailsPage() {
 
         setTicket(selected);
         setStatusValue(selected.status);
+        setAssigneeValue(selected.assignee?.id ? String(selected.assignee.id) : "");
+
+        if (user?.role === "MANAGER") {
+          const users = await fetchUsers(token);
+          const assignees = (users || []).filter((u) => u.role === "MANAGER" || u.role === "SUPPORT");
+          setSupportUsers(assignees);
+        }
 
         const commentData = await fetchTicketComments(token, ticketId);
         setComments(commentData || []);
@@ -61,7 +73,7 @@ export default function TicketDetailsPage() {
     };
 
     load();
-  }, [ready, token, ticketId]);
+  }, [ready, token, ticketId, user?.role]);
 
   const onAddComment = async (e) => {
     e.preventDefault();
@@ -140,13 +152,40 @@ export default function TicketDetailsPage() {
     setError("");
 
     try {
-      const data = await updateTicketStatus(token, ticket.id, statusValue);
-      setTicket(data?.ticket || ticket);
+      await updateTicketStatus(token, ticket.id, statusValue);
+      const ticketData = await fetchTickets(token, "?page=1&limit=100");
+      const refreshed = (ticketData?.tickets || []).find((t) => t.id === ticket.id);
+      if (refreshed) {
+        setTicket(refreshed);
+        setStatusValue(refreshed.status);
+      }
     } catch (err) {
       setError(err.message);
       setStatusValue(ticket.status);
     } finally {
       setStatusSaving(false);
+    }
+  };
+
+  const onAssign = async (e) => {
+    e.preventDefault();
+    if (!ticket || !assigneeValue) return;
+
+    setAssignSaving(true);
+    setError("");
+
+    try {
+      await assignTicket(token, ticket.id, Number(assigneeValue));
+      const ticketData = await fetchTickets(token, "?page=1&limit=100");
+      const refreshed = (ticketData?.tickets || []).find((t) => t.id === ticket.id);
+      if (refreshed) {
+        setTicket(refreshed);
+        setAssigneeValue(refreshed.assignee?.id ? String(refreshed.assignee.id) : "");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAssignSaving(false);
     }
   };
 
@@ -202,6 +241,30 @@ export default function TicketDetailsPage() {
 
                   <button type="submit" className="btn" disabled={statusSaving || statusValue === ticket.status}>
                     {statusSaving ? "Updating..." : "Update Status"}
+                  </button>
+                </form>
+              )}
+
+              {user?.role === "MANAGER" && (
+                <form className="ticket-inline-form" onSubmit={onAssign}>
+                  <label>
+                    Assign To
+                    <select
+                      value={assigneeValue}
+                      onChange={(e) => setAssigneeValue(e.target.value)}
+                      disabled={assignSaving}
+                    >
+                      <option value="">Select assignee</option>
+                      {supportUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.role})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <button type="submit" className="btn" disabled={assignSaving || !assigneeValue}>
+                    {assignSaving ? "Assigning..." : "Assign Ticket"}
                   </button>
                 </form>
               )}

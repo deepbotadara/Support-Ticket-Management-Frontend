@@ -57,6 +57,18 @@ export const updateTicketStatus = (token, ticketId, status) =>
     body: { status },
   });
 
+export const fetchUsers = (token) =>
+  apiRequest("/users", {
+    token,
+  });
+
+export const assignTicket = (token, ticketId, userId) =>
+  apiRequest(`/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    token,
+    body: { userId },
+  });
+
 export const fetchTicketComments = (token, ticketId) =>
   apiRequest(`/tickets/${ticketId}/comments`, {
     token,
